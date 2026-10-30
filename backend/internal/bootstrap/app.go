@@ -3,7 +3,7 @@ package bootstrap
 import "qrgen/internal/logger"
 
 
-func Init() {
+func InitApp() {
 	logger := logger.NewLogger()
 	_ = logger
 }
