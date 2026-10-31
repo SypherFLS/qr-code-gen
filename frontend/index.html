@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10151f">
+  <title>QR Studio — генератор QR-кодов</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark">QR</span>
+        <span>qr<span class="brand-light">studio</span></span>
+      </a>
+      <div class="status" id="service-status"><span class="status-dot"></span> Проверяем сервис…</div>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div class="eyebrow">QR CODE GENERATOR</div>
+        <h1>Ссылка.<br><span>В один QR.</span></h1>
+        <p>Вставь ссылку — получи QR-код, который можно скачать или открыть повторно по ID.</p>
+      </section>
+
+      <section class="workspace">
+        <div class="panel form-panel">
+          <div class="panel-heading">
+            <div>
+              <div class="step">01 / СОЗДАНИЕ</div>
+              <h2>Новый QR-код</h2>
+            </div>
+            <span class="heading-icon">↗</span>
+          </div>
+
+          <form id="create-form">
+            <label for="url">Ссылка для кодирования</label>
+            <div class="input-wrap">
+              <span class="input-prefix">https://</span>
+              <input id="url" name="url" type="url" placeholder="example.com" required autocomplete="url">
+            </div>
+            <p class="field-hint">Поддерживаются ссылки HTTP и HTTPS.</p>
+            <button class="primary-button" id="create-button" type="submit">
+              <span>Сгенерировать QR</span><span aria-hidden="true">↗</span>
+            </button>
+          </form>
+
+          <div class="divider"></div>
+
+          <div class="step">02 / ПОЛУЧЕНИЕ</div>
+          <h2 class="small-title">Уже есть ID?</h2>
+          <form id="lookup-form" class="lookup-form">
+            <input id="lookup-id" type="text" placeholder="Вставь UUID QR-кода" autocomplete="off">
+            <button class="secondary-button" type="submit" aria-label="Получить QR-код">Найти</button>
+          </form>
+          <p class="field-hint">Загружает изображение из Redis по сохранённому идентификатору.</p>
+        </div>
+
+        <div class="panel result-panel" aria-live="polite">
+          <div class="panel-heading">
+            <div>
+              <div class="step">РЕЗУЛЬТАТ</div>
+              <h2 id="result-title">Твой QR появится здесь</h2>
+            </div>
+            <span class="result-badge" id="result-badge">ОЖИДАНИЕ</span>
+          </div>
+
+          <div class="preview" id="preview">
+            <div class="empty-state" id="empty-state">
+              <div class="empty-qr">
+                <span>▦</span>
+              </div>
+              <strong>Пока пусто</strong>
+              <span>Введи ссылку и нажми «Сгенерировать QR»</span>
+            </div>
+            <img id="qr-image" alt="Сгенерированный QR-код" hidden>
+            <div class="loader" id="loader" hidden></div>
+          </div>
+
+          <div class="result-details" id="result-details" hidden>
+            <div class="id-row">
+              <div class="id-copy">
+                <span class="detail-label">ID КОДА</span>
+                <code id="qr-id"></code>
+              </div>
+              <button class="icon-button" id="copy-button" type="button" title="Копировать ID">Копировать</button>
+            </div>
+            <button class="download-button" id="download-button" type="button">
+              <span>Скачать PNG</span><span aria-hidden="true">↓</span>
+            </button>
+          </div>
+          <div class="notice" id="notice" hidden></div>
+        </div>
+      </section>
+
+      <section class="info-strip">
+        <div><span class="info-number">01</span><span>Генерация PNG</span></div>
+        <div><span class="info-number">02</span><span>Хранение в Redis</span></div>
+        <div><span class="info-number">03</span><span>Получение по UUID</span></div>
+      </section>
+    </main>
+
+    <footer>
+      <span>QR STUDIO</span>
+      <span>Go · Gin · Redis · Docker</span>
+    </footer>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>
