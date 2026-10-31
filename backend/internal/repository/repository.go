@@ -4,6 +4,6 @@ import (
 
 )
 
-func main() {
+type Repository interface {
 	
 }
