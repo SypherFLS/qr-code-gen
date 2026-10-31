@@ -1,7 +1,8 @@
 package apperrors
 
-import (
-	_ "errors"
-)
+import "errors"
 
-const ()
+var (
+	ErrNotFound   = errors.New("qr code not found")
+	ErrInvalidURL = errors.New("invalid URL: only http and https URLs are supported")
+)

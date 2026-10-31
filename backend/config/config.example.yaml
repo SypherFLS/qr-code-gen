@@ -1,14 +1,10 @@
-env: dev
-
 service:
-  port=":8080"
-  timeout:10
-  idle_timeout:60
+  port: ":8080"
+  timeout: 10
+  idle_timeout: 60
 
-postgres:
-  host=localhost
-  port=5432
-  user=postgres
-  password=postgres
-  dbname=qr_service
-  sslmode=disable
+database:
+  timeout: 10
+  ttl: 24
+  host: "localhost:6379"
+  db: 0

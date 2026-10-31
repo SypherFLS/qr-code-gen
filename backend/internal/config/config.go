@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -20,24 +19,11 @@ type ServiceConfig struct {
 }
 
 type DatabaseConfig struct {
+	TTL      int    `yaml:"ttl"`
+	Timeout  int    `yaml:"timeout"`
 	Host     string `yaml:"host"`
-	Port     int    `yaml:"port"`
-	User     string `yaml:"user"`
 	Password string `yaml:"password"`
-	DBName   string `yaml:"dbname"`
-	SSLMode  string `yaml:"sslmode"`
-}
-
-func (c *DatabaseConfig) DSN() string {
-	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%d/%s?sslmode=%s",
-		c.User,
-		c.Password,
-		c.Host,
-		c.Port,
-		c.DBName,
-		c.SSLMode,
-	)
+	DB       int    `yaml:"db"`
 }
 
 func InitConfig(path string) (Config, error) {
