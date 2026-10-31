@@ -5,3 +5,5 @@ config.yaml
 
 !config.example.yaml
 !.env.example
+
+task.md

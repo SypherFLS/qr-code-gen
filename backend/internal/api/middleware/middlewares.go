@@ -1,59 +1,23 @@
 package middleware
 
-import (
-	"context"
-	// "log"
-	"log/slog"
-	"net/http"
-	// "qrgen/internal/api/utils"
-	"qrgen/internal/consts"
-	"time"
-	"uuid"
+import ()
 
-	"github.com/gin-gonic/gin"
-)
+func TraceMiddleware() {
 
-func TraceMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		requestID := uuid.New().String()
-
-		ctx := context.WithValue(
-			c.Request.Context(),
-			consts.RequestIDKey,
-			requestID,
-		)
-
-		c.Request = c.Request.WithContext(ctx)
-		c.Next()
-	}
 }
 
-func Logger(logger *slog.Logger) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		start := time.Now()
-		// requestID := utils.GetRequestID(c.Request.Context())
-		c.Next()
-		
-		latency := time.Since(start)
+func LoggingMiddleware() {
 
-		logger.Info("Request took %v", latency)
-	}
 }
 
-func Recover() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		defer func(){
-			if err := recover(); err != nil {
-				// logger.Error("", )
+func RecoverMiddleware() {
 
-				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-					"error": "internal server error",
-				})
-			}
-		}()
-		
-
-		c.Next()
-	}
 }
 
+func TimeoutMiddleware() {
+
+}
+
+func RateLimitingMiddleware() {
+
+}

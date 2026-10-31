@@ -1,15 +1,15 @@
-package logger 
+package logger
 
 import (
 	"log/slog"
 	"os"
 )
 
-func NewLogger() *slog.Logger{
+func NewLogger() *slog.Logger {
 	handler := slog.NewJSONHandler(
 		os.Stdout,
 		&slog.HandlerOptions{
-			Level : slog.LevelInfo,
+			Level:     slog.LevelInfo,
 			AddSource: true,
 		},
 	)

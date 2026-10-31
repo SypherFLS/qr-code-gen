@@ -2,9 +2,8 @@ package utils
 
 import (
 	"context"
-
 )
 
-func GetRequestID(c *context.Context) string{
+func GetRequestID(c *context.Context) string {
 	return ""
 }
