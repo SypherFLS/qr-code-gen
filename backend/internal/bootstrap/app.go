@@ -68,7 +68,7 @@ func InitApp(parent context.Context) (*App, error) {
 
 	app := &App{
 		AppLogger: appLogger,
-		Router:    router.NewRouter(qrHandler),
+		Router:    router.NewRouter(qrHandler, appLogger, cfg.Server.Timeout),
 		Config:    &cfg,
 		Client:    rdb,
 	}
