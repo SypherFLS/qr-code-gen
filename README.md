@@ -1,83 +1,44 @@
 # QR Code Generator
 
-Небольшой сервис для генерации QR-кодов из HTTP/HTTPS URL.
-
-## Состав
-
-- Go + Gin — HTTP API.
-- Redis — хранение PNG по UUID с TTL.
-- Nginx — статический frontend и reverse proxy к API.
-- Docker Compose — запуск всего стенда.
+Сервис создаёт QR-коды для HTTP- и HTTPS-ссылок. Готовое PNG-изображение можно сразу забрать из ответа API или позже получить по UUID. Для хранения используется Redis с ограниченным сроком жизни записей.
 
 ## Запуск
 
-Требуется Docker Engine и Docker Compose v2.
+Нужны Docker Engine и Docker Compose v2. При первом запуске подготовь локальные файлы конфигурации:
 
-Из корня проекта:
+```bash
+cp backend/.env.example backend/.env
+cp backend/config/config.example.yaml backend/config/config.yaml
+```
+
+Для запуска через Compose укажи `redis:6379` в поле `database.host` файла `backend/config/config.yaml`: именно так приложение обращается к Redis внутри Docker-сети.
+
+Затем из корня проекта запусти:
 
 ```bash
 docker compose up --build -d
 ```
 
-Открыть интерфейс: http://localhost:3000
+Интерфейс будет доступен на http://localhost:3000, API — на http://localhost:8080.
 
-API доступно напрямую: http://localhost:8080
-
-Проверка состояния:
+Полезные команды:
 
 ```bash
 docker compose ps
 docker compose logs -f app
 docker compose logs -f redis
-```
-
-Остановка:
-
-```bash
 docker compose down
 ```
 
-Удаление Redis-данных (необратимо):
-
-```bash
-docker compose down -v
-```
+`docker compose down` оставляет данные Redis в Docker volume. Чтобы удалить и их, выполни `docker compose down -v` — это действие необратимо.
 
 ## API
 
+Полная спецификация OpenAPI 3.0 находится в [`backend/scheme/openapi.yaml`](backend/scheme/openapi.yaml). Её можно открыть в любом инструменте, который поддерживает OpenAPI.
+
 ### Создать QR-код
 
-```http
-POST /gen
-Content-Type: application/json
-
-{"url":"https://example.com"}
-```
-
-Ответ `201 Created`:
-
-```json
-{
-  "id": "<uuid>",
-  "image": "<base64 PNG>"
-}
-```
-
-### Получить QR-код
-
-```http
-GET /code/{id}
-```
-
-Успешный ответ — бинарное изображение с `Content-Type: image/png`.
-
-### Health check
-
-```http
-GET /health
-```
-
-## Проверка через curl
+`POST /gen` принимает JSON с абсолютным URL. Поддерживаются только ссылки с протоколом `http` или `https`.
 
 ```bash
 curl -X POST http://localhost:8080/gen \
@@ -85,22 +46,43 @@ curl -X POST http://localhost:8080/gen \
   -d '{"url":"https://example.com"}'
 ```
 
-Скопируй `id` из JSON-ответа:
+При успехе сервер отвечает `201 Created`:
 
-```bash
-curl http://localhost:8080/code/<UUID> --output qr.png
+```json
+{
+  "id": "8f4c7f61-8c43-4efb-83fd-63b2ae712934",
+  "image": "<PNG в Base64>"
+}
 ```
 
-## Конфигурация
+Поле `image` содержит Base64 самого PNG, без префикса `data:image/png;base64,`. Значение `id` понадобится, чтобы получить файл позже.
 
-Docker-конфигурация находится в `backend/config/config.yaml`.
-Локальные переменные окружения — в `backend/.env`. Не добавляй реальные секреты в Git.
+Если JSON некорректен или ссылка не прошла проверку, API возвращает `400 Bad Request` с телом вида `{"error":"..."}`. Ошибка генерации или сохранения возвращает `500 Internal Server Error` в том же формате.
 
-Redis доступен приложению по адресу `redis:6379` внутри Compose-сети. Порт Redis наружу не публикуется.
+### Получить изображение
 
-## Примечания
+`GET /code/{id}` возвращает PNG с типом содержимого `image/png`:
 
-- PNG сохраняется в Redis как бинарное значение, без Base64.
-- Base64 используется только в JSON-ответе `POST /gen`.
-- Срок хранения QR-кода задаётся параметром `database.ttl` в часах.
-- Redis AOF включён, данные хранятся в Docker volume `redis_data`.
+```bash
+curl http://localhost:8080/code/8f4c7f61-8c43-4efb-83fd-63b2ae712934 \
+  --output qr.png
+```
+
+Если такого UUID нет в Redis или срок хранения записи закончился, сервер отвечает `404 Not Found` и JSON с полем `error`.
+
+### Проверить доступность API
+
+`GET /health` возвращает `200 OK` и `{"status":"ok"}`.
+
+## Конфигурация и разработка
+
+Пример настроек находится в `backend/config/config.example.yaml`, переменных окружения — в `backend/.env.example`. Локальные файлы `backend/config/config.yaml` и `backend/.env` не хранятся в Git. Срок хранения задаётся параметром `database.ttl` в часах; в примере конфигурации он равен 24 часам.
+
+Для запуска Go-проверок из корня проекта:
+
+```bash
+make test
+make build
+```
+
+В Docker Compose Redis доступен приложению по адресу `redis:6379`, а с хоста наружу опубликованы только порты приложения и интерфейса.
