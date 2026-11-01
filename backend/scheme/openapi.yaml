@@ -1,0 +1,141 @@
+openapi: 3.0.3
+info:
+  title: QR Code Generator API
+  description: API для создания QR-кодов из HTTP- и HTTPS-ссылок и получения сохранённых изображений.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Локальный запуск через Docker Compose
+paths:
+  /gen:
+    post:
+      operationId: createQRCode
+      summary: Создать QR-код
+      description: Генерирует PNG-изображение, сохраняет его в Redis и возвращает изображение в Base64 вместе с UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateQRRequest"
+            example:
+              url: https://example.com
+      responses:
+        "201":
+          description: QR-код создан и сохранён.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateQRResponse"
+              example:
+                id: 8f4c7f61-8c43-4efb-83fd-63b2ae712934
+                image: iVBORw0KGgoAAAANSUhEUg...
+        "400":
+          description: Некорректный JSON или URL. Поддерживаются только HTTP- и HTTPS-ссылки.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "invalid URL: only http and https URLs are supported"
+        "500":
+          description: Не удалось создать или сохранить QR-код.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: failed to create QR code
+  /code/{id}:
+    get:
+      operationId: getQRCode
+      summary: Получить QR-код
+      description: Возвращает сохранённое PNG-изображение по UUID. Код хранится ограниченное время; после истечения срока он становится недоступен.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID, полученный при создании QR-кода.
+          schema:
+            type: string
+            format: uuid
+          example: 8f4c7f61-8c43-4efb-83fd-63b2ae712934
+      responses:
+        "200":
+          description: PNG-изображение QR-кода.
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: QR-код не найден или срок его хранения истёк.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: QR code not found
+        "500":
+          description: Не удалось получить QR-код.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: failed to retrieve QR code
+  /health:
+    get:
+      operationId: getHealth
+      summary: Проверить доступность API
+      responses:
+        "200":
+          description: API доступно.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              example:
+                status: ok
+components:
+  schemas:
+    CreateQRRequest:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Абсолютный URL с протоколом http или https.
+          example: https://example.com
+    CreateQRResponse:
+      type: object
+      required:
+        - id
+        - image
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор для последующего получения изображения.
+        image:
+          type: string
+          format: byte
+          description: PNG-изображение в Base64 без префикса data URI.
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Краткое описание ошибки.
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          example: ok
