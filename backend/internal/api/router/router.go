@@ -1,8 +1,8 @@
 package router
 
 import (
-	"net/http"
 	"log/slog"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 
@@ -27,6 +27,5 @@ func NewRouter(h *handler.Handler, logger *slog.Logger, timeout int) *gin.Engine
 	r.POST("/gen", h.CreateQRHandler)
 	r.GET("/code/:"+string(consts.ID), h.GetQRHandler)
 
-	
 	return r
 }
