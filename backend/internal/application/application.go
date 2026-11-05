@@ -1,4 +1,4 @@
-package service
+package application
 
 import (
 	"context"
@@ -13,19 +13,19 @@ import (
 	"qrgen/internal/repository"
 )
 
-type Service struct {
+type Application struct {
 	repo repository.Repository
 	ttl  time.Duration
 }
 
-func NewService(repo repository.Repository, ttl time.Duration) *Service {
-	return &Service{
+func NewApplication(repo repository.Repository, ttl time.Duration) *Application {
+	return &Application{
 		repo: repo,
 		ttl:  ttl,
 	}
 }
 
-func (s *Service) CreateQRService(ctx context.Context, rawURL string) (string, []byte, error) {
+func (s *Application) CreateQRApplication(ctx context.Context, rawURL string) (string, []byte, error) {
 	parsed, err := url.ParseRequestURI(rawURL)
 	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") {
 		return "", nil, apperrors.ErrInvalidURL
@@ -45,6 +45,6 @@ func (s *Service) CreateQRService(ctx context.Context, rawURL string) (string, [
 	return id, png, nil
 }
 
-func (s *Service) GetQRService(ctx context.Context, id string) ([]byte, error) {
+func (s *Application) GetQRApplication(ctx context.Context, id string) ([]byte, error) {
 	return s.repo.Get(ctx, id)
 }

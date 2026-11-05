@@ -17,7 +17,7 @@ import (
 	"qrgen/internal/config"
 	"qrgen/internal/logger"
 	"qrgen/internal/repository/redisrepo"
-	"qrgen/internal/service"
+	"qrgen/internal/application"
 )
 
 type App struct {
@@ -63,8 +63,8 @@ func InitApp(parent context.Context) (*App, error) {
 	}
 
 	repo := redisrepo.NewRepo(rdb)
-	qrService := service.NewService(repo, time.Duration(cfg.Database.TTL)*time.Hour)
-	qrHandler := handler.NewHandler(qrService)
+	qrApplication := application.NewApplication(repo, time.Duration(cfg.Database.TTL)*time.Hour)
+	qrHandler := handler.NewHandler(qrApplication)
 
 	app := &App{
 		AppLogger: appLogger,

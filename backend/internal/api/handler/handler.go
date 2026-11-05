@@ -10,15 +10,15 @@ import (
 	"qrgen/internal/apperrors"
 	"qrgen/internal/consts"
 	"qrgen/internal/dto"
-	"qrgen/internal/service"
+	"qrgen/internal/application"
 )
 
 type Handler struct {
-	service *service.Service
+	application *application.Application
 }
 
-func NewHandler(service *service.Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(application *application.Application) *Handler {
+	return &Handler{application: application}
 }
 
 func (h *Handler) CreateQRHandler(c *gin.Context) {
@@ -28,7 +28,7 @@ func (h *Handler) CreateQRHandler(c *gin.Context) {
 		return
 	}
 
-	id, png, err := h.service.CreateQRService(c.Request.Context(), req.URL)
+	id, png, err := h.application.CreateQRApplication(c.Request.Context(), req.URL)
 	if err != nil {
 		if errors.Is(err, apperrors.ErrInvalidURL) {
 			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
@@ -51,7 +51,7 @@ func (h *Handler) GetQRHandler(c *gin.Context) {
 		return
 	}
 
-	png, err := h.service.GetQRService(c.Request.Context(), id)
+	png, err := h.application.GetQRApplication(c.Request.Context(), id)
 	if err != nil {
 		if errors.Is(err, apperrors.ErrNotFound) {
 			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "QR code not found"})
