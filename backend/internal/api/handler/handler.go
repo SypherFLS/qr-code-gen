@@ -8,9 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"qrgen/internal/apperrors"
+	"qrgen/internal/application"
 	"qrgen/internal/consts"
 	"qrgen/internal/dto"
-	"qrgen/internal/application"
 )
 
 type Handler struct {

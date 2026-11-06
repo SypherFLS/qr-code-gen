@@ -3,14 +3,13 @@ package application
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"time"
 
 	"github.com/google/uuid"
 
-	"qrgen/internal/apperrors"
 	"qrgen/internal/qrgen"
 	"qrgen/internal/repository"
+	"qrgen/internal/validation"
 )
 
 type Application struct {
@@ -25,10 +24,12 @@ func NewApplication(repo repository.Repository, ttl time.Duration) *Application 
 	}
 }
 
-func (s *Application) CreateQRApplication(ctx context.Context, rawURL string) (string, []byte, error) {
-	parsed, err := url.ParseRequestURI(rawURL)
-	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") {
-		return "", nil, apperrors.ErrInvalidURL
+func (s *Application) CreateQRApplication(
+	ctx context.Context,
+	rawURL string,
+) (string, []byte, error) {
+	if err := validation.ValidateHTTPURL(rawURL); err != nil {
+		return "", nil, err
 	}
 
 	id := uuid.NewString()
@@ -45,6 +46,9 @@ func (s *Application) CreateQRApplication(ctx context.Context, rawURL string) (s
 	return id, png, nil
 }
 
-func (s *Application) GetQRApplication(ctx context.Context, id string) ([]byte, error) {
+func (s *Application) GetQRApplication(
+	ctx context.Context,
+	id string,
+) ([]byte, error) {
 	return s.repo.Get(ctx, id)
 }

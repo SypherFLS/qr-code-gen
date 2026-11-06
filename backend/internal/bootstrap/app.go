@@ -14,10 +14,10 @@ import (
 
 	"qrgen/internal/api/handler"
 	"qrgen/internal/api/router"
+	"qrgen/internal/application"
 	"qrgen/internal/config"
 	"qrgen/internal/logger"
 	"qrgen/internal/repository/redisrepo"
-	"qrgen/internal/application"
 )
 
 type App struct {
